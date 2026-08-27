@@ -6,7 +6,7 @@ A Fischer Product Lab command center for a Technical Program Manager running an 
 
 > **Synthetic demonstration.** Every identity count, application, and risk is fictional. There is no live directory, HR, or identity-platform integration, no authentication, and no write path. The UI shows a persistent DEMO badge.
 
-**Live:** *(added after Vercel deploy)* · **Repo:** [Fischer-Product-Lab/cutoverdesk](https://github.com/Fischer-Product-Lab/cutoverdesk)
+**Live:** [cutoverdesk-fpl.vercel.app](https://cutoverdesk-fpl.vercel.app/) · **Repo:** [Fischer-Product-Lab/cutoverdesk](https://github.com/Fischer-Product-Lab/cutoverdesk)
 
 ## Screens
 

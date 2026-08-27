@@ -4,7 +4,7 @@
 |---|---|
 | Product | CutoverDesk |
 | Repo | https://github.com/Fischer-Product-Lab/cutoverdesk |
-| Live URL | *(pending Vercel)* |
+| Live URL | https://cutoverdesk-fpl.vercel.app/ (alias of https://cutoverdesk.vercel.app/) |
 | Branch | `main` |
 | Shape | Single-file static HTML + Chart.js CDN (same family as FPL PF Roadmap) |
 
