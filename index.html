@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="CutoverDesk — synthetic IAM migration command center for Meridian Financial. LegacyID to Nexus Identity program status." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230C1B30'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia,serif' font-size='18' font-weight='700' fill='%23E4C778'%3EC%3C/text%3E%3C/svg%3E" />
+  <title>CutoverDesk — Meridian Financial Identity Migration</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy-0: #0C1B30;
+      --navy-1: #132640;
+      --navy-2: #1F3A5F;
+      --ivory: #F5F1E6;
+      --ivory-muted: #E8E2D0;
+      --gold: #E4C778;
+      --gold-deep: #C29A45;
+      --text-navy: #F5F1E6;
+      --muted-navy: #8B9BB4;
+      --text-ivory: #0C1B30;
+      --muted-ivory: #5C6B80;
+      --green: #3D9B6E;
+      --amber: #D4A017;
+      --red: #B03A3A;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-navy);
+      background: linear-gradient(180deg, var(--navy-0) 0%, var(--navy-2) 100%);
+      line-height: 1.45;
+    }
+    .app { max-width: 1440px; margin: 0 auto; padding: 20px 24px 40px; }
+    .header {
+      background: var(--navy-1);
+      border: 1px solid rgba(228, 199, 120, 0.22);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 18px 20px 0;
+      margin-bottom: 18px;
+    }
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .brand-kicker {
+      margin: 0 0 4px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .header h1 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+    .subtitle { margin: 0; color: var(--muted-navy); font-size: 13px; }
+    .header-meta { text-align: right; }
+    .header-meta .as-of { margin: 6px 0 0; font-size: 12px; color: var(--muted-navy); }
+    .demo-pill {
+      display: inline-block;
+      background: var(--gold-deep);
+      color: var(--navy-0);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .tablist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      border-top: 1px solid rgba(139, 155, 180, 0.18);
+      padding: 8px 0 0;
+    }
+    .tablist button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: rgba(245, 241, 230, 0.6);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+    }
+    .tablist button[aria-selected="true"] {
+      color: var(--ivory);
+      background: var(--navy-2);
+      box-shadow: inset 0 -2px 0 var(--gold);
+    }
+    .tablist button:hover { color: var(--ivory); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--ivory);
+      color: var(--text-ivory);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+    }
+    .card.kpi { border-top: 2px solid var(--gold); }
+    .card.kpi.danger { border-top-color: var(--red); }
+    .card h2, .card h3 { margin: 0 0 10px; font-size: 14px; }
+    .muted { color: var(--muted-ivory); }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .kpi-value {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .kpi-label { margin-top: 6px; font-size: 12px; font-weight: 700; }
+    .kpi-sub { margin-top: 4px; font-size: 11px; color: var(--muted-ivory); }
+    .legend, .health {
+      background: var(--ivory);
+      color: var(--text-ivory);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+    }
+    .health strong { color: var(--navy-0); }
+    .progress-track {
+      height: 10px;
+      background: var(--ivory-muted);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill { height: 100%; border-radius: 999px; background: var(--gold-deep); }
+    .wave-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1.1fr) 40px 110px minmax(180px, 0.9fr) 140px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid var(--ivory-muted);
+    }
+    .wave-row:first-of-type { border-top: 0; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .wave-name { font-weight: 700; font-size: 13px; }
+    .wave-aud { font-size: 11px; color: var(--muted-ivory); }
+    .rag-pip { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px) {
+      .two-col { grid-template-columns: 1fr; }
+      .wave-row { grid-template-columns: 1fr; }
+      .header-meta { text-align: left; }
+    }
+    .funnel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .gantt-wrap {
+      overflow-x: auto;
+      background: var(--ivory);
+      color: var(--text-ivory);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 22px 16px 16px;
+    }
+    .gantt {
+      min-width: 1100px;
+      position: relative;
+    }
+    .gantt-head, .gantt-row, .gantt-miles {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      align-items: stretch;
+    }
+    .gantt-left {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--ivory);
+      padding: 8px 12px 8px 0;
+      border-right: 1px solid var(--ivory-muted);
+    }
+    .gantt-track {
+      position: relative;
+      height: 56px;
+    }
+    .gantt-gridline {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(12, 27, 48, 0.08);
+      pointer-events: none;
+    }
+    .gantt-miles .gantt-track { height: 42px; }
+    .month-row { position: relative; height: 22px; font-size: 11px; font-weight: 700; color: var(--muted-ivory); }
+    .month-row span { position: absolute; text-align: center; }
+    .today-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--red);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .today-label {
+      position: absolute;
+      top: -16px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--red);
+      white-space: nowrap;
+    }
+    .gantt-bar {
+      position: absolute;
+      top: 14px;
+      height: 28px;
+      border: 0;
+      padding: 0;
+      display: block;
+      font: inherit;
+      border-radius: 7px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(12, 27, 48, 0.2);
+    }
+    .gantt-bar:hover { filter: brightness(1.08); }
+    .gantt-bar .done {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: rgba(12, 27, 48, 0.35);
+      border-radius: 7px 0 0 7px;
+    }
+    .diamond {
+      position: absolute;
+      top: 14px;
+      width: 12px;
+      height: 12px;
+      transform: translateX(-50%) rotate(45deg);
+      cursor: pointer;
+      border: 2px solid var(--gold-deep);
+      background: transparent;
+    }
+    .diamond.complete { background: var(--gold); }
+    .diamond:hover { filter: brightness(1.1); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { text-align: left; padding: 7px 8px; vertical-align: top; }
+    th { font-size: 11px; color: var(--muted-ivory); font-weight: 700; border-bottom: 1px solid var(--ivory-muted); }
+    td { border-bottom: 1px solid rgba(12, 27, 48, 0.06); }
+    tr.wave-head td, tr.wave-head th {
+      background: var(--ivory-muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    tr.cohort-row { cursor: pointer; }
+    tr.cohort-row:hover td { background: rgba(228, 199, 120, 0.18); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; }
+    .matrix { width: 100%; }
+    .matrix th, .matrix td { text-align: center; }
+    .matrix th:first-child, .matrix td:first-child { text-align: left; }
+    .matrix td.cell { min-width: 88px; }
+    .cell-sub { font-size: 10px; font-weight: 600; color: var(--muted-ivory); margin-top: 2px; }
+    .app-row, .risk-row, .decision, .rdy {
+      padding: 10px 0;
+      border-top: 1px solid var(--ivory-muted);
+    }
+    .app-row:first-child, .risk-row:first-child, .decision:first-child, .rdy:first-child { border-top: 0; }
+    .row-flex { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .grow { flex: 1; }
+    .decision { border-left: 3px solid var(--gold-deep); padding-left: 12px; }
+    .footer {
+      margin-top: 18px;
+      color: var(--muted-navy);
+      font-size: 12px;
+    }
+    .popover-root {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 27, 48, 0.55);
+      z-index: 40;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .popover-root.open { display: flex; }
+    .popover-card {
+      background: var(--ivory);
+      color: var(--text-ivory);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      max-width: 560px;
+      width: 100%;
+      max-height: 86vh;
+      overflow: auto;
+      padding: 20px 22px;
+      position: relative;
+    }
+    .popover-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: 0;
+      background: var(--ivory-muted);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .popover-card h3 { margin: 0 20px 8px 0; }
+    .popover-card ul { margin: 6px 0 12px; padding-left: 18px; }
+    .blocked { color: var(--red); font-weight: 700; }
+    .sox {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+      white-space: nowrap;
+      border: 1px solid var(--gold-deep);
+      color: var(--navy-0);
+      background: transparent;
+    }
+    @media print {
+      body { background: #fff; color: #0C1B30; }
+      .header {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        background: #fff;
+        color: #0C1B30;
+      }
+      .brand-kicker, .subtitle, .as-of, .footer { color: #5C6B80; }
+      .tablist, .popover-root, .demo-pill { display: none !important; }
+      .panel, .panel.active, .panel[hidden] { display: block !important; }
+      .card, .legend, .health, .gantt-wrap { box-shadow: none; break-inside: avoid; }
+    }
+    .tier-h { margin: 16px 0 6px; font-size: 13px; }
+    .chart-box { position: relative; height: 260px; }
+    .chart-box.tall { height: 300px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-top">
+        <div>
+          <p class="brand-kicker">Fischer Product Lab</p>
+          <h1>CutoverDesk</h1>
+          <p class="subtitle" id="header-sub"></p>
+        </div>
+        <div class="header-meta">
+          <span class="demo-pill">DEMO / Synthetic data</span>
+          <p class="as-of" id="header-asof"></p>
+        </div>
+      </div>
+      <div class="tablist" role="tablist" aria-label="CutoverDesk views">
+        <button role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" tabindex="0">Overview</button>
+        <button role="tab" id="tab-waves" aria-controls="panel-waves" aria-selected="false" tabindex="-1">Waves</button>
+        <button role="tab" id="tab-identities" aria-controls="panel-identities" aria-selected="false" tabindex="-1">Identities</button>
+        <button role="tab" id="tab-applications" aria-controls="panel-applications" aria-selected="false" tabindex="-1">Applications</button>
+        <button role="tab" id="tab-risks" aria-controls="panel-risks" aria-selected="false" tabindex="-1">Risks</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="panel-overview" class="panel active" role="tabpanel" aria-labelledby="tab-overview"></section>
+      <section id="panel-waves" class="panel" role="tabpanel" aria-labelledby="tab-waves" hidden></section>
+      <section id="panel-identities" class="panel" role="tabpanel" aria-labelledby="tab-identities" hidden></section>
+      <section id="panel-applications" class="panel" role="tabpanel" aria-labelledby="tab-applications" hidden></section>
+      <section id="panel-risks" class="panel" role="tabpanel" aria-labelledby="tab-risks" hidden></section>
+    </main>
+
+    <p class="footer" id="disclaimer"></p>
+  </div>
+
+  <div class="popover-root" id="popover" role="dialog" aria-modal="true" aria-labelledby="popover-title">
+    <div class="popover-card" id="popover-card">
+      <button class="popover-close" id="popover-close" aria-label="Close">✕</button>
+      <div id="popover-body"></div>
+    </div>
+  </div>
+
+  <script>
+const DATA = {
+  meta: {
+    company: "Meridian Financial",
+    product: "CutoverDesk",
+    program: "LegacyID → Nexus Identity Migration",
+    sourcePlatform: "LegacyID",
+    targetPlatform: "Nexus Identity",
+    windowStart: "2026-06-01",
+    windowEnd: "2026-12-31",
+    today: "2026-08-26",
+    owner: "Technical Program Manager, Enterprise IAM",
+    disclaimer: "Synthetic demonstration data. No live directory, HR, or identity-platform integration."
+  },
+
+  waves: [
+    {
+      id: "w0",
+      name: "Wave 0 — Pilot",
+      shortName: "Wave 0",
+      audience: "IT staff and IAM team (canary cohort)",
+      color: "#E4C778",
+      start: "2026-06-01",
+      end: "2026-06-28",
+      status: "Complete",
+      definition: "Smallest blast-radius cohort. Proves dual-run, helpdesk playbooks, and rollback before any business population moves.",
+      entryCriteria: [
+        "Dual-run architecture live on Nexus Identity",
+        "Break-glass accounts tested",
+        "Service-desk Wave 0 runbook certified"
+      ],
+      exitCriteria: [
+        "Pilot identities verified on Nexus for 10 business days",
+        "No Sev-1 auth incidents attributable to cutover",
+        "LegacyID disabled for the pilot cohort"
+      ],
+      examples: [
+        { name: "Priya N.", role: "IAM Engineer", status: "Legacy Disabled" },
+        { name: "Marcus T.", role: "IT Operations Lead", status: "Verified" }
+      ]
+    },
+    {
+      id: "w1",
+      name: "Wave 1 — Standard workforce",
+      shortName: "Wave 1",
+      audience: "Low-privilege, low-criticality departments and contingent staff",
+      color: "#4C9AFF",
+      start: "2026-06-23",
+      end: "2026-09-12",
+      status: "In Progress",
+      definition: "Largest population. Standard and contingent identities on Tier 2–3 applications. Moves only after Wave 0 exit criteria are met.",
+      entryCriteria: [
+        "Wave 0 gate = Go",
+        "MFA enrollment ≥ 70% in scoped departments",
+        "Manager attestation campaign launched"
+      ],
+      exitCriteria: [
+        "≥ 95% of Wave 1 identities on Nexus",
+        "Contingent MFA exception backlog < 50",
+        "LegacyID disabled for completed departments"
+      ],
+      examples: [
+        { name: "Elena R.", role: "Retail Banking Supervisor", status: "Verified" },
+        { name: "Wei C.", role: "EMEA contingent contractor", status: "Blocked — MFA exception" }
+      ]
+    },
+    {
+      id: "w2",
+      name: "Wave 2 — Business-critical users",
+      shortName: "Wave 2",
+      audience: "Revenue-adjacent teams and Tier 1 application users",
+      color: "#36B37E",
+      start: "2026-08-04",
+      end: "2026-10-17",
+      status: "In Progress",
+      definition: "Wealth, markets, commercial banking, and client services. Dual-run required on SOX-relevant Tier 1 apps before LegacyID disable.",
+      entryCriteria: [
+        "Wave 1 ≥ 60% on Nexus",
+        "Tier 1 SAML/OIDC mappings signed by app owners",
+        "SOX evidence pack drafted"
+      ],
+      exitCriteria: [
+        "All Tier 1 in-scope apps Verified or Cut Over",
+        "SOX control evidence signed",
+        "Fallout < 2% of wave population"
+      ],
+      examples: [
+        { name: "Sofia M.", role: "Wealth Advisor", status: "In Dual-Run" },
+        { name: "Jonah K.", role: "Capital Markets trader", status: "Scheduled" }
+      ]
+    },
+    {
+      id: "w3",
+      name: "Wave 3 — Privileged access",
+      shortName: "Wave 3",
+      audience: "Admins and elevated-entitlement holders",
+      color: "#FF8B37",
+      start: "2026-09-21",
+      end: "2026-11-07",
+      status: "Planned",
+      definition: "Privileged users move only after recording, approval, and break-glass controls are proven on Nexus. Highest access risk.",
+      entryCriteria: [
+        "Wave 2 gate = Go",
+        "Privileged session recording live on Nexus",
+        "Break-glass path retested",
+        "SOX evidence pack signed"
+      ],
+      exitCriteria: [
+        "100% of privileged identities on Nexus with recording",
+        "Standing privileged grants recertified",
+        "LegacyID admin paths disabled"
+      ],
+      examples: [
+        { name: "Omar H.", role: "Security admin (privileged)", status: "Ready — gated" },
+        { name: "Ravi S.", role: "Directory admin", status: "Not Started" }
+      ]
+    },
+    {
+      id: "w4",
+      name: "Wave 4 — Executives & high-touch",
+      shortName: "Wave 4",
+      audience: "C-suite, board, and white-glove support cohort",
+      color: "#C87BFF",
+      start: "2026-10-26",
+      end: "2026-11-21",
+      status: "Planned",
+      definition: "Smallest human wave. Dedicated concierge cutover on a published weekend, after privileged controls are live.",
+      entryCriteria: [
+        "Wave 3 privileged controls live",
+        "White-glove runbook complete",
+        "Executive device compliance 100%"
+      ],
+      exitCriteria: [
+        "Every executive identity verified on Nexus",
+        "Concierge hypercare closed with no open Sev-2+",
+        "LegacyID disabled for the executive OU"
+      ],
+      examples: [
+        { name: "A. Hale", role: "Chief Operating Officer", status: "Not Started" },
+        { name: "Board Secretary", role: "Governance office", status: "Ready (attested)" }
+      ]
+    },
+    {
+      id: "w5",
+      name: "Wave 5 — Non-human identities",
+      shortName: "Wave 5",
+      audience: "Service accounts, shared mailboxes, federated partners",
+      color: "#8B9BB4",
+      start: "2026-11-02",
+      end: "2026-12-19",
+      status: "Planned",
+      definition: "Hardest wave. Non-human identities have no manager to attest them and often have hardcoded secrets. Inventory quality gates the start.",
+      entryCriteria: [
+        "Complete NHI inventory with owner",
+        "Secret-rotation window agreed",
+        "Partner federation metadata refreshed"
+      ],
+      exitCriteria: [
+        "Every in-scope NHI has an owner and rotation date",
+        "Partner metadata validated in a dry run",
+        "LegacyID service-account namespace decommissioned"
+      ],
+      examples: [
+        { name: "svc-ledger-batch", role: "General Ledger batch job", status: "Not Started" },
+        { name: "fed-partner-clearing", role: "Partner federation identity", status: "Ready — metadata review" }
+      ]
+    }
+  ],
+
+  /* 26 cohorts. Status columns MUST sum to the cohort population.
+   * blocked is an overlay (subset of notStarted + ready + scheduled), NOT a seventh stage.
+   * Grand total of status columns = 12,400. */
+  cohorts: [
+    /* —— Wave 0 —— */
+    { id: "C-W0-01", wave: "w0", criticality: "Standard", privilege: "Elevated", department: "IT Operations", region: "AMER", notStarted: 0, ready: 0, scheduled: 0, migrated: 8, verified: 12, legacyDisabled: 120, blocked: 0 },
+    { id: "C-W0-02", wave: "w0", criticality: "Standard", privilege: "Privileged", department: "Identity & Access", region: "AMER", notStarted: 0, ready: 0, scheduled: 0, migrated: 4, verified: 6, legacyDisabled: 70, blocked: 0 },
+    { id: "C-W0-03", wave: "w0", criticality: "Standard", privilege: "Elevated", department: "Security Operations", region: "AMER", notStarted: 0, ready: 0, scheduled: 0, migrated: 2, verified: 8, legacyDisabled: 50, blocked: 0 },
+
+    /* —— Wave 1 —— */
+    { id: "C-W1-01", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Retail Banking", region: "AMER", notStarted: 40, ready: 80, scheduled: 120, migrated: 280, verified: 420, legacyDisabled: 900, blocked: 28 },
+    { id: "C-W1-02", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Retail Banking", region: "EMEA", notStarted: 60, ready: 90, scheduled: 110, migrated: 180, verified: 200, legacyDisabled: 280, blocked: 22 },
+    { id: "C-W1-03", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Human Resources", region: "AMER", notStarted: 20, ready: 40, scheduled: 60, migrated: 80, verified: 140, legacyDisabled: 300, blocked: 8 },
+    { id: "C-W1-04", wave: "w1", criticality: "Contingent", privilege: "Standard", department: "Contingent Workforce", region: "AMER", notStarted: 180, ready: 220, scheduled: 160, migrated: 200, verified: 180, legacyDisabled: 160, blocked: 48 },
+    { id: "C-W1-05", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Operations", region: "AMER", notStarted: 50, ready: 70, scheduled: 80, migrated: 160, verified: 220, legacyDisabled: 400, blocked: 14 },
+    { id: "C-W1-06", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Operations", region: "APAC", notStarted: 80, ready: 90, scheduled: 70, migrated: 100, verified: 90, legacyDisabled: 110, blocked: 18 },
+    { id: "C-W1-07", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Finance Shared Services", region: "AMER", notStarted: 30, ready: 50, scheduled: 60, migrated: 120, verified: 180, legacyDisabled: 280, blocked: 10 },
+    { id: "C-W1-08", wave: "w1", criticality: "Standard", privilege: "Standard", department: "Marketing", region: "AMER", notStarted: 20, ready: 30, scheduled: 40, migrated: 70, verified: 80, legacyDisabled: 140, blocked: 6 },
+    { id: "C-W1-09", wave: "w1", criticality: "Contingent", privilege: "Standard", department: "Contingent Workforce", region: "EMEA", notStarted: 40, ready: 50, scheduled: 40, migrated: 50, verified: 60, legacyDisabled: 60, blocked: 12 },
+
+    /* —— Wave 2 —— */
+    { id: "C-W2-01", wave: "w2", criticality: "Business-Critical", privilege: "Standard", department: "Wealth Management", region: "AMER", notStarted: 180, ready: 160, scheduled: 140, migrated: 160, verified: 120, legacyDisabled: 100, blocked: 36 },
+    { id: "C-W2-02", wave: "w2", criticality: "Business-Critical", privilege: "Standard", department: "Capital Markets", region: "AMER", notStarted: 160, ready: 140, scheduled: 120, migrated: 100, verified: 80, legacyDisabled: 40, blocked: 28 },
+    { id: "C-W2-03", wave: "w2", criticality: "Business-Critical", privilege: "Standard", department: "Commercial Banking", region: "AMER", notStarted: 120, ready: 110, scheduled: 90, migrated: 80, verified: 70, legacyDisabled: 50, blocked: 20 },
+    { id: "C-W2-04", wave: "w2", criticality: "Business-Critical", privilege: "Standard", department: "Wealth Management", region: "EMEA", notStarted: 100, ready: 80, scheduled: 70, migrated: 60, verified: 40, legacyDisabled: 30, blocked: 16 },
+    { id: "C-W2-05", wave: "w2", criticality: "Business-Critical", privilege: "Standard", department: "Client Services", region: "AMER", notStarted: 40, ready: 50, scheduled: 40, migrated: 40, verified: 40, legacyDisabled: 30, blocked: 8 },
+
+    /* —— Wave 3 —— */
+    { id: "C-W3-01", wave: "w3", criticality: "Business-Critical", privilege: "Privileged", department: "Platform Engineering", region: "AMER", notStarted: 120, ready: 40, scheduled: 12, migrated: 8, verified: 0, legacyDisabled: 0, blocked: 12 },
+    { id: "C-W3-02", wave: "w3", criticality: "Standard", privilege: "Privileged", department: "IT Operations", region: "AMER", notStarted: 110, ready: 30, scheduled: 16, migrated: 4, verified: 0, legacyDisabled: 0, blocked: 8 },
+    { id: "C-W3-03", wave: "w3", criticality: "Standard", privilege: "Privileged", department: "Identity & Access", region: "AMER", notStarted: 70, ready: 20, scheduled: 8, migrated: 2, verified: 0, legacyDisabled: 0, blocked: 4 },
+    { id: "C-W3-04", wave: "w3", criticality: "Business-Critical", privilege: "Privileged", department: "Security Operations", region: "AMER", notStarted: 56, ready: 16, scheduled: 6, migrated: 2, verified: 0, legacyDisabled: 0, blocked: 6 },
+
+    /* —— Wave 4 —— */
+    { id: "C-W4-01", wave: "w4", criticality: "Executive", privilege: "Elevated", department: "Executive Office", region: "AMER", notStarted: 58, ready: 14, scheduled: 0, migrated: 0, verified: 0, legacyDisabled: 0, blocked: 0 },
+    { id: "C-W4-02", wave: "w4", criticality: "Executive", privilege: "Elevated", department: "Board & Governance", region: "AMER", notStarted: 40, ready: 8, scheduled: 0, migrated: 0, verified: 0, legacyDisabled: 0, blocked: 0 },
+
+    /* —— Wave 5 —— */
+    { id: "C-W5-01", wave: "w5", criticality: "Non-Human", privilege: "Privileged", department: "Platform Engineering", region: "AMER", notStarted: 520, ready: 80, scheduled: 20, migrated: 0, verified: 0, legacyDisabled: 0, blocked: 12 },
+    { id: "C-W5-02", wave: "w5", criticality: "Non-Human", privilege: "Standard", department: "Shared Services", region: "AMER", notStarted: 400, ready: 60, scheduled: 20, migrated: 0, verified: 0, legacyDisabled: 0, blocked: 8 },
+    { id: "C-W5-03", wave: "w5", criticality: "Non-Human", privilege: "Standard", department: "Partner Federation", region: "AMER", notStarted: 280, ready: 32, scheduled: 8, migrated: 0, verified: 0, legacyDisabled: 0, blocked: 4 }
+  ],
+
+  /* 20 applications. */
+  applications: [
+    { id: "APP-01", name: "Nexus Identity Admin Console", tier: 0, protocol: "OIDC", wave: "w0", status: "Verified", sox: false, owner: "Priya N. (IAM)" },
+    { id: "APP-02", name: "Privileged Access Gateway", tier: 0, protocol: "SAML", wave: "w3", status: "Not Started", sox: true, owner: "Omar H. (Security)" },
+    { id: "APP-03", name: "Directory Sync Fabric", tier: 0, protocol: "LDAP", wave: "w0", status: "Verified", sox: false, owner: "Priya N. (IAM)" },
+    { id: "APP-04", name: "VPN / Zero Trust Edge", tier: 0, protocol: "SAML", wave: "w1", status: "Cut Over", sox: false, owner: "Jonah K. (Network)" },
+    { id: "APP-05", name: "Core Banking Platform", tier: 1, protocol: "SAML", wave: "w2", status: "In Dual-Run", sox: true, owner: "Sofia M. (Wealth Eng)" },
+    { id: "APP-06", name: "Trading Workstation", tier: 1, protocol: "SAML", wave: "w2", status: "In Dual-Run", sox: true, owner: "Wei C. (Markets Eng)" },
+    { id: "APP-07", name: "Payments Hub", tier: 1, protocol: "OIDC", wave: "w2", status: "Not Started", sox: true, owner: "Ana B. (Payments)" },
+    { id: "APP-08", name: "Client Portal", tier: 1, protocol: "OIDC", wave: "w2", status: "In Dual-Run", sox: false, owner: "Lisa G. (Client Platform)" },
+    { id: "APP-09", name: "General Ledger", tier: 1, protocol: "SAML", wave: "w1", status: "Cut Over", sox: true, owner: "Derek L. (Finance Systems)" },
+    { id: "APP-10", name: "Regulatory Reporting Suite", tier: 1, protocol: "SAML", wave: "w2", status: "Not Started", sox: true, owner: "Hannah P. (Compliance Tech)" },
+    { id: "APP-11", name: "HRIS", tier: 2, protocol: "SAML", wave: "w1", status: "Cut Over", sox: false, owner: "Elena R. (HR Tech)" },
+    { id: "APP-12", name: "Service Desk", tier: 2, protocol: "OIDC", wave: "w0", status: "Verified", sox: false, owner: "Ravi S. (ITSM)" },
+    { id: "APP-13", name: "Expense & Travel", tier: 2, protocol: "OIDC", wave: "w1", status: "Cut Over", sox: false, owner: "Derek L. (Finance Systems)" },
+    { id: "APP-14", name: "Collaboration Suite", tier: 2, protocol: "OIDC", wave: "w1", status: "Cut Over", sox: false, owner: "Marcus T. (IT Ops)" },
+    { id: "APP-15", name: "Document Management", tier: 2, protocol: "SAML", wave: "w1", status: "In Dual-Run", sox: false, owner: "Nina F. (Operations)" },
+    { id: "APP-16", name: "CRM / Advisor Desktop", tier: 2, protocol: "OIDC", wave: "w2", status: "Not Started", sox: false, owner: "Sofia M. (Wealth Eng)" },
+    { id: "APP-17", name: "Intranet / Wiki", tier: 3, protocol: "OIDC", wave: "w1", status: "Cut Over", sox: false, owner: "Chris V. (Internal Comms)" },
+    { id: "APP-18", name: "Facilities Badging", tier: 3, protocol: "LDAP", wave: "w1", status: "In Dual-Run", sox: false, owner: "Nina F. (Facilities)" },
+    { id: "APP-19", name: "Learning Management", tier: 3, protocol: "SAML", wave: "w1", status: "Deferred", sox: false, owner: "Elena R. (HR Tech)" },
+    { id: "APP-20", name: "Vendor Portal (legacy)", tier: 3, protocol: "Legacy", wave: "w5", status: "Not Started", sox: false, owner: "Ana B. (Procurement Systems)" }
+  ],
+
+  /* 12 risks. 5 Open, 5 Mitigating, 2 Watch. 3 have decisionNeeded: true. */
+  risks: [
+    { id: "RISK-01", headline: "Privileged session recording gap on Nexus", description: "Wave 3 cannot start until interactive privileged sessions are recorded end-to-end on Nexus. Vendor selection is still open.", wave: "w3", severity: "Critical", status: "Open", rag: "Red", owner: "Omar H. (Security)", due: "2026-09-18", decisionNeeded: true, decision: "Approve the privileged session-recording vendor so Wave 3 can keep its September 21 start." },
+    { id: "RISK-02", headline: "Contingent workforce MFA exception backlog", description: "AMER and EMEA contractors are stacking MFA exceptions, which is the main Wave 1 fallout driver.", wave: "w1", severity: "High", status: "Mitigating", rag: "Amber", owner: "Elena R. (HR Tech)", due: "2026-09-05", decisionNeeded: false, decision: "" },
+    { id: "RISK-03", headline: "Core Banking SAML assertion mapping drift", description: "Dual-run on Core Banking is showing role-claim mismatches versus LegacyID group maps.", wave: "w2", severity: "High", status: "Mitigating", rag: "Amber", owner: "Sofia M. (Wealth Eng)", due: "2026-09-12", decisionNeeded: false, decision: "" },
+    { id: "RISK-04", headline: "EMEA works-council notification lag", description: "EMEA contingent cutover is paused pending works-council acknowledgement of the identity-platform change.", wave: "w1", severity: "High", status: "Open", rag: "Red", owner: "Legal / HR (Elena R.)", due: "2026-09-01", decisionNeeded: true, decision: "Proceed with EMEA contingent cutover without works-council ACK, or slip Wave 1 EMEA to September 19." },
+    { id: "RISK-05", headline: "Service-account password-rotation window too short", description: "NHI owners say the proposed 14-day rotation window will break batch jobs during Wave 5.", wave: "w5", severity: "High", status: "Open", rag: "Amber", owner: "Platform Engineering (Wei C.)", due: "2026-10-31", decisionNeeded: false, decision: "" },
+    { id: "RISK-06", headline: "Dual-run token lifetime mismatch", description: "Nexus access-token lifetime is shorter than LegacyID, causing mid-session drops on dual-run Tier 1 apps.", wave: "w2", severity: "Medium", status: "Mitigating", rag: "Amber", owner: "Priya N. (IAM)", due: "2026-09-08", decisionNeeded: false, decision: "" },
+    { id: "RISK-07", headline: "APAC device-compliance telemetry gap", description: "APAC Operations endpoints are under-reporting MDM compliance, which blocks Ready → Scheduled.", wave: "w1", severity: "Medium", status: "Open", rag: "Amber", owner: "Endpoint (Marcus T.)", due: "2026-09-10", decisionNeeded: false, decision: "" },
+    { id: "RISK-08", headline: "Executive white-glove runbook incomplete", description: "Wave 4 weekend runbook is missing concierge staffing and a named rollback commander.", wave: "w4", severity: "Medium", status: "Open", rag: "Amber", owner: "PMO (Nina F.)", due: "2026-10-10", decisionNeeded: true, decision: "Lock the executive cutover weekend of November 7–8 and name the rollback commander." },
+    { id: "RISK-09", headline: "Partner federation metadata stale", description: "Three federated partners have not rotated signing certificates since 2025.", wave: "w5", severity: "Medium", status: "Watch", rag: "Amber", owner: "Priya N. (IAM)", due: "2026-11-02", decisionNeeded: false, decision: "" },
+    { id: "RISK-10", headline: "SOX control evidence pack not signed", description: "Wave 2 exit requires a signed SOX pack covering assertion mapping, joiner/mover/leaver, and access recert.", wave: "w2", severity: "Medium", status: "Mitigating", rag: "Amber", owner: "GRC (Hannah P.)", due: "2026-10-03", decisionNeeded: false, decision: "" },
+    { id: "RISK-11", headline: "Helpdesk surge staffing for Wave 2", description: "Service desk model assumes +18% ticket volume during Wave 2 dual-run; overtime roster is only 70% filled.", wave: "w2", severity: "Low", status: "Mitigating", rag: "Green", owner: "Ravi S. (ITSM)", due: "2026-09-04", decisionNeeded: false, decision: "" },
+    { id: "RISK-12", headline: "LegacyID license true-down schedule", description: "Procurement needs a December true-down quantity once Wave 5 inventory is final.", wave: "w5", severity: "Low", status: "Watch", rag: "Green", owner: "Procurement (Ana B.)", due: "2026-12-04", decisionNeeded: false, decision: "" }
+  ],
+
+  readiness: [
+    { id: "RDY-01", name: "MFA enrollment", percent: 78, target: 95, owner: "IAM" },
+    { id: "RDY-02", name: "Device compliance", percent: 71, target: 90, owner: "Endpoint" },
+    { id: "RDY-03", name: "Manager attestation of access", percent: 64, target: 100, owner: "App owners" },
+    { id: "RDY-04", name: "Application dependency mapping", percent: 82, target: 100, owner: "Architecture" },
+    { id: "RDY-05", name: "Fallback / break-glass tested", percent: 45, target: 100, owner: "Security" },
+    { id: "RDY-06", name: "Communications acknowledged", percent: 69, target: 95, owner: "Change management" },
+    { id: "RDY-07", name: "Helpdesk playbook certified", percent: 88, target: 100, owner: "Service desk" },
+    { id: "RDY-08", name: "Legacy password-hash export freeze", percent: 100, target: 100, owner: "IAM" }
+  ],
+
+  milestones: [
+    { id: "M1", name: "Dual-run architecture live", date: "2026-06-15", status: "Complete" },
+    { id: "M2", name: "Wave 0 gate review (Go)", date: "2026-06-26", status: "Complete" },
+    { id: "M3", name: "Wave 1 gate review (Go with conditions)", date: "2026-07-24", status: "Complete" },
+    { id: "M4", name: "Wave 2 gate review", date: "2026-09-04", status: "Upcoming" },
+    { id: "M5", name: "Privileged control attestation", date: "2026-09-18", status: "Upcoming" },
+    { id: "M6", name: "Wave 3 gate review", date: "2026-10-16", status: "Upcoming" },
+    { id: "M7", name: "Executive white-glove weekend", date: "2026-11-07", status: "Upcoming" },
+    { id: "M8", name: "LegacyID decommission decision", date: "2026-12-04", status: "Upcoming" },
+    { id: "M9", name: "LegacyID contract end / true-down", date: "2026-12-31", status: "Upcoming" }
+  ],
+
+  /*
+   * LegacyID accounts still active (not yet legacyDisabled).
+   * August actualRemaining MUST equal totalIdentities - sum(legacyDisabled) = 9,280.
+   * June / July are historical snapshots. Sep–Dec are forecast only (actualRemaining: null).
+   */
+  decommissionBurndown: [
+    { month: "2026-06", label: "Jun", actualRemaining: 12160, forecastRemaining: 12100 },
+    { month: "2026-07", label: "Jul", actualRemaining: 10840, forecastRemaining: 10600 },
+    { month: "2026-08", label: "Aug", actualRemaining: 9280, forecastRemaining: 8800 },
+    { month: "2026-09", label: "Sep", actualRemaining: null, forecastRemaining: 6200 },
+    { month: "2026-10", label: "Oct", actualRemaining: null, forecastRemaining: 4100 },
+    { month: "2026-11", label: "Nov", actualRemaining: null, forecastRemaining: 1800 },
+    { month: "2026-12", label: "Dec", actualRemaining: null, forecastRemaining: 0 }
+  ]
+};
+
+    const FUNNEL_STAGES = [
+      { key: "notStarted", label: "Not Started", color: "#6B778C" },
+      { key: "ready", label: "Ready", color: "#4C9AFF" },
+      { key: "scheduled", label: "Scheduled", color: "#D4A017" },
+      { key: "migrated", label: "Migrated", color: "#36B37E" },
+      { key: "verified", label: "Verified", color: "#3D9B6E" },
+      { key: "legacyDisabled", label: "Legacy Disabled", color: "#1F3A5F" }
+    ];
+    const CRITICALITY = ["Executive", "Business-Critical", "Standard", "Contingent", "Non-Human"];
+    const CRITICALITY_COLOR = {
+      Executive: "#C87BFF",
+      "Business-Critical": "#FF8B37",
+      Standard: "#4C9AFF",
+      Contingent: "#36B37E",
+      "Non-Human": "#8B9BB4"
+    };
+    const PRIVILEGE_COLOR = { Privileged: "#B03A3A", Elevated: "#D4A017", Standard: "#5C6B80" };
+    const PROTOCOL_COLOR = { SAML: "#C29A45", OIDC: "#4C9AFF", LDAP: "#00A3BF", Legacy: "#6B778C" };
+    const APP_STATUS_COLOR = {
+      Verified: "#3D9B6E",
+      "Cut Over": "#36B37E",
+      "In Dual-Run": "#D4A017",
+      Deferred: "#6B778C",
+      "Not Started": "#8B9BB4"
+    };
+    const SEVERITY_COLOR = { Critical: "#B03A3A", High: "#FF8B37", Medium: "#D4A017", Low: "#5C6B80" };
+    const RISK_STATUS_COLOR = { Open: "#B03A3A", Mitigating: "#D4A017", Watch: "#4C9AFF", Closed: "#3D9B6E" };
+    const RAG_COLOR = { green: "#3D9B6E", amber: "#D4A017", red: "#B03A3A" };
+    const WAVE_STATUS_COLOR = { Complete: "#3D9B6E", "In Progress": "#D4A017", Planned: "#6B778C" };
+    const MILESTONE_STATUS_COLOR = { Complete: "#3D9B6E", Upcoming: "#8B9BB4" };
+    const NAVY_ON = new Set(["#E4C778", "#C29A45", "#4C9AFF", "#D4A017", "#C87BFF", "#00A3BF", "#8B9BB4", "#FF8B37", "#36B37E", "#3D9B6E"]);
+    const TIER_HINT = {
+      0: "Identity and edge infrastructure",
+      1: "Business-critical / SOX-adjacent",
+      2: "Enterprise productivity",
+      3: "Long-tail and legacy"
+    };
+    function parseDate(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+    }
+    function formatDate(iso) {
+      return parseDate(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+    }
+    function formatInt(n) { return Math.round(n).toLocaleString("en-US"); }
+    function formatPct(ratio) {
+      if (!isFinite(ratio) || ratio === 0) return "0%";
+      const p = Math.round(ratio * 1000) / 10;
+      return Number.isInteger(p) ? p + "%" : p.toFixed(1) + "%";
+    }
+    function daysBetween(a, b) {
+      return Math.round((parseDate(b) - parseDate(a)) / 86400000);
+    }
+    function waveMeta(id) { return DATA.waves.find((w) => w.id === id); }
+    function pillFg(bg) { return NAVY_ON.has(bg.toUpperCase()) ? "#0C1B30" : "#F5F1E6"; }
+    function pill(label, bg) {
+      return `<span class="pill" style="background:${bg};color:${pillFg(bg)}">${esc(label)}</span>`;
+    }
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+    function cohortTotal(c) {
+      return c.notStarted + c.ready + c.scheduled + c.migrated + c.verified + c.legacyDisabled;
+    }
+    function cohortOnNexus(c) { return c.migrated + c.verified + c.legacyDisabled; }
+    function sumBy(arr, fn) { return arr.reduce((n, x) => n + fn(x), 0); }
+    function waveCohorts(waveId) { return DATA.cohorts.filter((c) => c.wave === waveId); }
+    function wavePopulation(waveId) { return sumBy(waveCohorts(waveId), cohortTotal); }
+    function waveOnNexus(waveId) { return sumBy(waveCohorts(waveId), cohortOnNexus); }
+    function waveBlocked(waveId) { return sumBy(waveCohorts(waveId), (c) => c.blocked); }
+    function waveRag(wave) {
+      const pct = waveOnNexus(wave.id) / wavePopulation(wave.id);
+      if (wave.status === "Complete") return "green";
+      if (wave.status === "In Progress") {
+        if (pct >= 0.60) return "green";
+        if (pct >= 0.25) return "amber";
+        return "red";
+      }
+      return wave.start > DATA.meta.today ? "green" : "amber";
+    }
+    function appOnNexus(a) { return a.status === "Cut Over" || a.status === "Verified"; }
+    function readinessRag(item) {
+      if (item.percent >= item.target) return "green";
+      if (item.percent >= item.target - 15) return "amber";
+      return "red";
+    }
+    function hexToRgb(hex) {
+      const n = hex.replace("#", "");
+      return [parseInt(n.slice(0, 2), 16), parseInt(n.slice(2, 4), 16), parseInt(n.slice(4, 6), 16)];
+    }
+    function tint(hex, pct) {
+      const [r, g, b] = hexToRgb(hex);
+      return `rgba(${r},${g},${b},${(0.08 + pct * 0.32).toFixed(3)})`;
+    }
+    function windowSpan() { return daysBetween(DATA.meta.windowStart, DATA.meta.windowEnd); }
+    function posPct(iso) { return (daysBetween(DATA.meta.windowStart, iso) / windowSpan()) * 100; }
+    function widthPct(start, end) {
+      return ((daysBetween(start, end)) / windowSpan()) * 100;
+    }
+
+    function assertData() {
+      const total = sumBy(DATA.cohorts, cohortTotal);
+      if (total !== 12400) console.warn("Identity total drifted:", total);
+      for (const c of DATA.cohorts) {
+        if (c.blocked > c.notStarted + c.ready + c.scheduled) console.warn("blocked overlay", c.id);
+      }
+      const aug = DATA.decommissionBurndown.find((x) => x.month === "2026-08");
+      const remain = total - sumBy(DATA.cohorts, (c) => c.legacyDisabled);
+      if (aug.actualRemaining !== remain) console.warn("August burndown mismatch", aug.actualRemaining, remain);
+    }
+
+    function kpiCard(valueHtml, label, sub, danger) {
+      return `<article class="card kpi${danger ? " danger" : ""}"><div class="kpi-value">${valueHtml}</div><div class="kpi-label">${esc(label)}</div><div class="kpi-sub">${esc(sub)}</div></article>`;
+    }
+
+    function renderOverview() {
+      const total = sumBy(DATA.cohorts, cohortTotal);
+      const on = sumBy(DATA.cohorts, cohortOnNexus);
+      const blocked = sumBy(DATA.cohorts, (c) => c.blocked);
+      const legacy = sumBy(DATA.cohorts, (c) => c.legacyDisabled);
+      const appsOn = DATA.applications.filter(appOnNexus).length;
+      const wavesDone = DATA.waves.filter((w) => w.status === "Complete").length;
+      const w1pct = formatPct(waveOnNexus("w1") / wavePopulation("w1"));
+      const w2pct = formatPct(waveOnNexus("w2") / wavePopulation("w2"));
+
+      const waveRows = DATA.waves.map((w) => {
+        const pop = wavePopulation(w.id);
+        const n = waveOnNexus(w.id);
+        const b = waveBlocked(w.id);
+        const rag = waveRag(w);
+        return `<div class="wave-row">
+          <div><span class="dot" style="background:${w.color}"></span><span class="wave-name">${esc(w.name)}</span><div class="wave-aud">${esc(w.audience)}</div></div>
+          <span class="rag-pip" role="img" aria-label="Status: ${rag}" title="${rag}" style="background:${RAG_COLOR[rag]}"></span>
+          ${pill(w.status, WAVE_STATUS_COLOR[w.status])}
+          <div class="progress-track" title="${formatPct(n / pop)}"><div class="progress-fill" style="width:${(n / pop) * 100}%;background:${w.color}"></div></div>
+          <div style="text-align:right;font-size:12px;font-variant-numeric:tabular-nums">${formatInt(n)}/${formatInt(pop)} · ${formatPct(n / pop)}${b ? `<div class="blocked">${formatInt(b)} blocked</div>` : ""}</div>
+        </div>`;
+      }).join("");
+
+      document.getElementById("panel-overview").innerHTML = `
+        <div class="kpi-grid">
+          ${kpiCard(`${formatInt(on)} <span style="font-size:16px;font-weight:600;color:#5C6B80">/ ${formatInt(total)}</span>`, "Identities on Nexus", `${formatPct(on / total)} · Migrated + Verified + Legacy disabled`)}
+          ${kpiCard(`${appsOn} <span style="font-size:16px;font-weight:600;color:#5C6B80">/ ${DATA.applications.length}</span>`, "Apps cut over", `${formatPct(appsOn / DATA.applications.length)} · Cut Over + Verified`)}
+          ${kpiCard(`${wavesDone} <span style="font-size:16px;font-weight:600;color:#5C6B80">/ ${DATA.waves.length}</span>`, "Waves complete", "Exit criteria met")}
+          ${kpiCard(formatInt(blocked), "Blocked / fallout", "Overlay on not-yet-cut-over identities", true)}
+          ${kpiCard(formatInt(legacy), "LegacyID decommissioned", "Accounts disabled on LegacyID")}
+        </div>
+        <p class="legend">On Nexus = Migrated + Verified + Legacy disabled. A wave is Complete only when exit criteria are met. <span class="mono">blocked</span> is an overlay (subset of not-yet-cut-over identities), not a seventh funnel stage.</p>
+        <p class="health"><strong>Program health.</strong> Wave 0 is complete. Wave 1 is ${w1pct} on Nexus with contingent MFA fallout. Wave 2 is in dual-run at ${w2pct}. ${formatInt(blocked)} identities are blocked. Wave 3 (privileged) is gated on session recording.</p>
+        <div class="card">
+          <h2>Program progress · identities on Nexus</h2>
+          <div class="progress-track" style="height:14px"><div class="progress-fill" style="width:${(on / total) * 100}%"></div></div>
+          <p class="muted" style="margin:8px 0 0;font-size:12px">${formatInt(on)} of ${formatInt(total)} identities</p>
+          ${waveRows}
+        </div>`;
+    }
+
+    function monthAxis() {
+      const monthStarts = [
+        { label: "Jun", date: "2026-06-01" },
+        { label: "Jul", date: "2026-07-01" },
+        { label: "Aug", date: "2026-08-01" },
+        { label: "Sep", date: "2026-09-01" },
+        { label: "Oct", date: "2026-10-01" },
+        { label: "Nov", date: "2026-11-01" },
+        { label: "Dec", date: "2026-12-01" }
+      ];
+      const headers = monthStarts.map((m, i) => {
+        const left = posPct(m.date);
+        const next = monthStarts[i + 1];
+        const width = next ? posPct(next.date) - left : 100 - left;
+        return `<span style="left:${left}%;width:${width}%">${m.label}</span>`;
+      }).join("");
+      const lines = monthStarts.slice(1).map((m) =>
+        `<div class="gantt-gridline" style="left:${posPct(m.date)}%"></div>`
+      ).join("");
+      return { headers, lines };
+    }
+
+    function renderWaves() {
+      const todayLeft = posPct(DATA.meta.today);
+      const axis = monthAxis();
+      const miles = DATA.milestones.map((m) =>
+        `<button type="button" class="diamond${m.status === "Complete" ? " complete" : ""}" style="left:${posPct(m.date)}%" data-kind="milestone" data-id="${m.id}" title="${esc(m.name)}" aria-label="${esc(m.name)}, ${formatDate(m.date)}, ${m.status}"></button>`
+      ).join("");
+      const rows = DATA.waves.map((w) => {
+        const pop = wavePopulation(w.id);
+        const n = waveOnNexus(w.id);
+        const left = posPct(w.start);
+        const width = widthPct(w.start, w.end);
+        const done = pop ? (n / pop) * 100 : 0;
+        return `<div class="gantt-row">
+          <div class="gantt-left">
+            <div class="wave-name"><span class="dot" style="background:${w.color}"></span>${esc(w.name)}</div>
+            <div class="wave-aud">${esc(w.audience)}</div>
+            <div class="muted" style="font-size:11px">${formatInt(pop)} identities</div>
+          </div>
+          <div class="gantt-track">
+            ${axis.lines}
+            <div class="today-line" style="left:${todayLeft}%"></div>
+            <button type="button" class="gantt-bar" data-kind="wave" data-id="${w.id}" style="left:${left}%;width:${width}%;background:${w.color}" aria-label="${esc(w.name)}, ${formatDate(w.start)} to ${formatDate(w.end)}, ${w.status}">
+              <span class="done" style="width:${done}%"></span>
+            </button>
+          </div>
+        </div>`;
+      }).join("");
+
+      document.getElementById("panel-waves").innerHTML = `
+        <div class="gantt-wrap">
+          <div class="gantt">
+            <div class="gantt-head">
+              <div class="gantt-left muted" style="font-size:11px;font-weight:700">WAVE / MILESTONES</div>
+              <div>
+                <div class="month-row">${axis.headers}<div class="today-label" style="left:${todayLeft}%">Today</div></div>
+                <div class="gantt-track" style="height:8px">${axis.lines}<div class="today-line" style="left:${todayLeft}%"></div></div>
+              </div>
+            </div>
+            <div class="gantt-miles">
+              <div class="gantt-left muted" style="font-size:12px">Gates &amp; decommission</div>
+              <div class="gantt-track">${axis.lines}${miles}<div class="today-line" style="left:${todayLeft}%"></div></div>
+            </div>
+            ${rows}
+          </div>
+        </div>`;
+
+      document.getElementById("panel-waves").querySelectorAll("[data-kind]").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (el.dataset.kind === "wave") openWave(el.dataset.id);
+          else openMilestone(el.dataset.id);
+        });
+      });
+    }
+
+    function openWave(id) {
+      const w = waveMeta(id);
+      const pop = wavePopulation(id);
+      const on = waveOnNexus(id);
+      const blocked = waveBlocked(id);
+      const rag = waveRag(w);
+      const examples = w.examples.map((e) => `<li><strong>${esc(e.name)}</strong> — ${esc(e.role)} · ${esc(e.status)}</li>`).join("");
+      openPopover(`
+        <h3 id="popover-title"><span class="dot" style="background:${w.color}"></span>${esc(w.name)}</h3>
+        <p class="muted">${esc(w.audience)}</p>
+        <p>${formatDate(w.start)} – ${formatDate(w.end)} · ${pill(w.status, WAVE_STATUS_COLOR[w.status])} ${pill(rag, RAG_COLOR[rag])}</p>
+        <p>${esc(w.definition)}</p>
+        <p><strong>Identities.</strong> ${formatInt(on)} / ${formatInt(pop)} on Nexus (${formatPct(on / pop)})${blocked ? ` · <span class="blocked">${formatInt(blocked)} blocked</span>` : ""}</p>
+        <h4>Entry criteria</h4>
+        <ul>${w.entryCriteria.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <h4>Exit criteria</h4>
+        <ul>${w.exitCriteria.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+        <h4>Example identities</h4>
+        <ul>${examples}</ul>
+      `);
+    }
+
+    function openMilestone(id) {
+      const m = DATA.milestones.find((x) => x.id === id);
+      openPopover(`
+        <h3 id="popover-title">${esc(m.name)}</h3>
+        <p>${formatDate(m.date)} · ${pill(m.status, MILESTONE_STATUS_COLOR[m.status])}</p>
+      `);
+    }
+
+    function openCohort(id) {
+      const c = DATA.cohorts.find((x) => x.id === id);
+      const w = waveMeta(c.wave);
+      const pop = cohortTotal(c);
+      openPopover(`
+        <h3 id="popover-title">${esc(c.id)}</h3>
+        <p>${esc(c.department)} · ${esc(c.region)} · ${pill(c.criticality, CRITICALITY_COLOR[c.criticality])} ${pill(c.privilege, PRIVILEGE_COLOR[c.privilege])}</p>
+        <p>${pill(w.shortName, w.color)}</p>
+        <p><strong>${formatInt(cohortOnNexus(c))}</strong> / ${formatInt(pop)} on Nexus (${formatPct(cohortOnNexus(c) / pop)})${c.blocked ? ` · <span class="blocked">${formatInt(c.blocked)} blocked</span>` : ""}</p>
+        <p class="mono muted">NS ${c.notStarted} / R ${c.ready} / S ${c.scheduled} / M ${c.migrated} / V ${c.verified} / LD ${c.legacyDisabled}</p>
+      `);
+    }
+
+    let funnelChart, appChart, burnChart;
+
+    function renderIdentities() {
+      const total = sumBy(DATA.cohorts, cohortTotal);
+      const stageCards = FUNNEL_STAGES.map((s) => {
+        const n = sumBy(DATA.cohorts, (c) => c[s.key]);
+        return `<article class="card kpi"><div class="kpi-value" style="font-size:24px">${formatInt(n)}</div><div class="kpi-label">${esc(s.label)}</div><div class="kpi-sub">${formatPct(n / total)}</div></article>`;
+      }).join("");
+
+      const matrixHead = CRITICALITY.map((t) => `<th>${esc(t)}</th>`).join("") + "<th>Total</th>";
+      const matrixRows = DATA.waves.map((w) => {
+        const cells = CRITICALITY.map((tier) => {
+          const cellCohorts = DATA.cohorts.filter((c) => c.wave === w.id && c.criticality === tier);
+          const pop = sumBy(cellCohorts, cohortTotal);
+          const on = sumBy(cellCohorts, cohortOnNexus);
+          const title = pop ? `${formatPct(on / pop)} on Nexus` : "None";
+          const bg = pop ? tint(w.color, on / pop) : "transparent";
+          const body = pop ? `${formatInt(pop)}<div class="cell-sub">${formatPct(on / pop)}</div>` : "0";
+          return `<td class="cell" style="background:${bg}" title="${title}">${body}</td>`;
+        }).join("");
+        const rowPop = wavePopulation(w.id);
+        const rowOn = waveOnNexus(w.id);
+        const totalCell = `<td class="cell"><strong>${formatInt(rowPop)}</strong><div class="cell-sub">${formatPct(rowOn / rowPop)}</div></td>`;
+        return `<tr><th><span class="dot" style="background:${w.color}"></span>${esc(w.shortName)}</th>${cells}${totalCell}</tr>`;
+      }).join("");
+      const totalCells = CRITICALITY.map((tier) => {
+        const cellCohorts = DATA.cohorts.filter((c) => c.criticality === tier);
+        const pop = sumBy(cellCohorts, cohortTotal);
+        const on = sumBy(cellCohorts, cohortOnNexus);
+        return `<td class="cell"><strong>${formatInt(pop)}</strong><div class="cell-sub">${pop ? formatPct(on / pop) : "0%"}</div></td>`;
+      }).join("");
+      const grandPop = sumBy(DATA.cohorts, cohortTotal);
+      const grandOn = sumBy(DATA.cohorts, cohortOnNexus);
+      const matrixFoot = `<tr class="wave-head"><th>Total</th>${totalCells}<td class="cell"><strong>${formatInt(grandPop)}</strong><div class="cell-sub">${formatPct(grandOn / grandPop)}</div></td></tr>`;
+
+      const tableRows = DATA.waves.map((w) => {
+        const head = `<tr class="wave-head"><td colspan="9"><span class="dot" style="background:${w.color}"></span>${esc(w.name)} · ${formatInt(wavePopulation(w.id))} identities</td></tr>`;
+        const rows = waveCohorts(w.id).map((c) => {
+          const pop = cohortTotal(c);
+          const on = cohortOnNexus(c);
+          return `<tr class="cohort-row" data-cohort="${c.id}">
+            <td class="mono">${esc(c.id)}</td>
+            <td>${esc(c.department)}</td>
+            <td>${esc(c.region)}</td>
+            <td>${pill(c.criticality, CRITICALITY_COLOR[c.criticality])}</td>
+            <td>${pill(c.privilege, PRIVILEGE_COLOR[c.privilege])}</td>
+            <td>${formatInt(pop)}</td>
+            <td>${formatInt(on)} · ${formatPct(on / pop)}</td>
+            <td${c.blocked ? ' class="blocked"' : ""}>${formatInt(c.blocked)}</td>
+            <td class="mono muted">${c.notStarted}/${c.ready}/${c.scheduled}/${c.migrated}/${c.verified}/${c.legacyDisabled}</td>
+          </tr>`;
+        }).join("");
+        return head + rows;
+      }).join("");
+
+      document.getElementById("panel-identities").innerHTML = `
+        <div class="funnel-grid">${stageCards}</div>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Migration funnel</h2>
+          <div class="chart-box"><canvas id="funnel-chart" aria-label="Bar chart of migration funnel stages"></canvas></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Wave × criticality</h2>
+          <table class="matrix">
+            <thead><tr><th>Wave</th>${matrixHead}</tr></thead>
+            <tbody>${matrixRows}${matrixFoot}</tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>Cohort register</h2>
+          <p class="muted" style="margin-top:0;font-size:12px">Funnel counts: NS / R / S / M / V / LD</p>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr>
+                <th>ID</th><th>Department</th><th>Region</th><th>Criticality</th><th>Privilege</th>
+                <th>Population</th><th>On Nexus</th><th>Blocked</th><th>Funnel</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+      document.getElementById("panel-identities").querySelectorAll("[data-cohort]").forEach((row) => {
+        row.addEventListener("click", () => openCohort(row.dataset.cohort));
+      });
+    }
+
+    function chartUnavailable(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return true;
+      if (typeof Chart === "undefined") {
+        canvas.parentElement.innerHTML = `<p class="muted" style="margin:40px 0;text-align:center">Chart unavailable offline — data in cards above</p>`;
+        return true;
+      }
+      return false;
+    }
+
+    function initFunnelChart() {
+      const ctx = document.getElementById("funnel-chart");
+      if (!ctx || funnelChart) return;
+      if (chartUnavailable("funnel-chart")) return;
+      funnelChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: FUNNEL_STAGES.map((s) => s.label),
+          datasets: [{
+            data: FUNNEL_STAGES.map((s) => sumBy(DATA.cohorts, (c) => c[s.key])),
+            backgroundColor: FUNNEL_STAGES.map((s) => s.color),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          animation: false,
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { color: "#5C6B80" }, grid: { color: "rgba(12,27,48,0.08)" } }, x: { ticks: { color: "#0C1B30" }, grid: { display: false } } }
+        }
+      });
+    }
+
+    function renderApplications() {
+      const on = DATA.applications.filter(appOnNexus).length;
+      const dual = DATA.applications.filter((a) => a.status === "In Dual-Run").length;
+      const ns = DATA.applications.filter((a) => a.status === "Not Started").length;
+      const def = DATA.applications.filter((a) => a.status === "Deferred").length;
+      const sox = DATA.applications.filter((a) => a.sox).length;
+      const groups = [0, 1, 2, 3].map((tier) => {
+        const apps = DATA.applications.filter((a) => a.tier === tier);
+        const rows = apps.map((a) => {
+          const w = waveMeta(a.wave);
+          return `<div class="app-row">
+            <div class="row-flex">
+              <div class="grow"><strong>${esc(a.name)}</strong> <span class="mono muted">${esc(a.id)}</span></div>
+              ${pill(a.protocol, PROTOCOL_COLOR[a.protocol])}
+              ${pill(w.shortName, w.color)}
+              ${pill(a.status, APP_STATUS_COLOR[a.status])}
+              ${a.sox ? `<span class="sox">SOX</span>` : ""}
+              <span class="muted" style="font-size:12px">${esc(a.owner)}</span>
+            </div>
+          </div>`;
+        }).join("");
+        return `<h3 class="tier-h">Tier ${tier} · ${apps.length} · ${esc(TIER_HINT[tier])}</h3>${rows}`;
+      }).join("");
+
+      document.getElementById("panel-applications").innerHTML = `
+        <div class="kpi-grid">
+          ${kpiCard(String(on), "Cut over (on Nexus)", "Cut Over + Verified")}
+          ${kpiCard(String(dual), "In dual-run", "Still on both platforms")}
+          ${kpiCard(String(ns), "Not started", "Awaiting wave")}
+          ${kpiCard(String(def), "Deferred", "Out of current path")}
+        </div>
+        <p class="legend">${sox} SOX-relevant applications in the register.</p>
+        <div class="two-col">
+          <div class="card">${groups}</div>
+          <div class="card">
+            <h2>Cutover mix</h2>
+            <div class="chart-box"><canvas id="app-chart" aria-label="Doughnut chart of application cutover status"></canvas></div>
+          </div>
+        </div>`;
+    }
+
+    function initAppChart() {
+      const ctx = document.getElementById("app-chart");
+      if (!ctx || appChart) return;
+      if (chartUnavailable("app-chart")) return;
+      const statuses = ["Verified", "Cut Over", "In Dual-Run", "Deferred", "Not Started"];
+      const centerPlugin = {
+        id: "centerText",
+        afterDraw(chart) {
+          const { ctx: c, chartArea } = chart;
+          c.save();
+          c.fillStyle = "#0C1B30";
+          c.font = "700 22px Segoe UI, sans-serif";
+          c.textAlign = "center";
+          c.textBaseline = "middle";
+          c.fillText(String(DATA.applications.length), (chartArea.left + chartArea.right) / 2, (chartArea.top + chartArea.bottom) / 2);
+          c.restore();
+        }
+      };
+      appChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: statuses,
+          datasets: [{
+            data: statuses.map((s) => DATA.applications.filter((a) => a.status === s).length),
+            backgroundColor: statuses.map((s) => APP_STATUS_COLOR[s]),
+            borderWidth: 0
+          }]
+        },
+        options: {
+          animation: false,
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "62%",
+          plugins: { legend: { position: "bottom", labels: { color: "#0C1B30", boxWidth: 12 } } }
+        },
+        plugins: [centerPlugin]
+      });
+    }
+
+    function renderRisks() {
+      const open = DATA.risks.filter((r) => r.status === "Open").length;
+      const mit = DATA.risks.filter((r) => r.status === "Mitigating").length;
+      const hi = DATA.risks.filter((r) => r.severity === "Critical" || r.severity === "High").length;
+      const decisions = DATA.risks.filter((r) => r.decisionNeeded).map((r) => `
+        <div class="decision">
+          <div class="row-flex"><span class="mono">${esc(r.id)}</span> ${pill(r.severity, SEVERITY_COLOR[r.severity])}</div>
+          <strong>${esc(r.headline)}</strong>
+          <p style="margin:6px 0">${esc(r.decision)}</p>
+          <p class="muted" style="margin:0;font-size:12px">${esc(r.owner)} · ${formatDate(r.due)}</p>
+        </div>`).join("");
+
+      const rdy = DATA.readiness.map((item) => {
+        const rag = readinessRag(item);
+        const color = item.percent >= item.target ? "#C29A45" : RAG_COLOR[rag];
+        return `<div class="rdy">
+          <div class="row-flex"><strong class="grow">${esc(item.name)}</strong><span class="muted">${esc(item.owner)}</span></div>
+          <div class="progress-track" style="margin:6px 0"><div class="progress-fill" style="width:${item.percent}%;background:${color}"></div></div>
+          <div class="muted" style="font-size:12px">${item.percent}% of ${item.target}%</div>
+        </div>`;
+      }).join("");
+
+      const grouped = ["Critical", "High", "Medium", "Low"].map((sev) => {
+        const items = DATA.risks.filter((r) => r.severity === sev);
+        if (!items.length) return "";
+        const rows = items.map((r) => {
+          const overdue = r.due < DATA.meta.today && r.status === "Open";
+          return `<div class="risk-row">
+            <div class="row-flex">
+              <span class="mono">${esc(r.id)}</span>
+              ${pill(waveMeta(r.wave).shortName, waveMeta(r.wave).color)}
+              ${pill(r.severity, SEVERITY_COLOR[r.severity])}
+              ${pill(r.status, RISK_STATUS_COLOR[r.status])}
+              <span class="rag-pip" role="img" aria-label="Status: ${r.rag.toLowerCase()}" style="background:${RAG_COLOR[r.rag.toLowerCase()]}"></span>
+            </div>
+            <strong>${esc(r.headline)}</strong>
+            <p class="muted" style="margin:4px 0 6px">${esc(r.description)}</p>
+            <p style="margin:0;font-size:12px" class="${overdue ? "blocked" : "muted"}">${esc(r.owner)} · ${formatDate(r.due)}</p>
+          </div>`;
+        }).join("");
+        return `<h3 class="tier-h">${esc(sev)}</h3>${rows}`;
+      }).join("");
+
+      const aug = DATA.decommissionBurndown.find((x) => x.month === "2026-08");
+      const total = sumBy(DATA.cohorts, cohortTotal);
+      const remain = total - sumBy(DATA.cohorts, (c) => c.legacyDisabled);
+
+      document.getElementById("panel-risks").innerHTML = `
+        <div class="kpi-grid">
+          ${kpiCard(String(DATA.risks.length), "Total risks", "Open program register")}
+          ${kpiCard(String(open), "Open", "Need a decision or action", true)}
+          ${kpiCard(String(mit), "Mitigating", "Treatment underway")}
+          ${kpiCard(String(hi), "Critical + High", "Watch for Wave 1–3 gates")}
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <h2>Decisions needed</h2>
+          ${decisions}
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <h2>Readiness coverage</h2>
+            ${rdy}
+          </div>
+          <div class="card">
+            <h2>LegacyID accounts still active</h2>
+            <div class="chart-box tall"><canvas id="burn-chart" aria-label="Line chart of LegacyID accounts still active"></canvas></div>
+            <p class="muted" style="font-size:12px;margin:8px 0 0">August actual ${formatInt(aug.actualRemaining)} must equal identities not yet legacy-disabled (${formatInt(remain)}).</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h2>Risk register</h2>
+          ${grouped}
+        </div>`;
+    }
+
+    function initBurnChart() {
+      const ctx = document.getElementById("burn-chart");
+      if (!ctx || burnChart) return;
+      if (chartUnavailable("burn-chart")) return;
+      burnChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: DATA.decommissionBurndown.map((d) => d.label),
+          datasets: [
+            {
+              label: "Actual remaining",
+              data: DATA.decommissionBurndown.map((d) => d.actualRemaining),
+              borderColor: "#C29A45",
+              backgroundColor: "rgba(194,154,69,0.15)",
+              spanGaps: false,
+              tension: 0.2,
+              pointRadius: 4
+            },
+            {
+              label: "Forecast remaining",
+              data: DATA.decommissionBurndown.map((d) => d.forecastRemaining),
+              borderColor: "#1F3A5F",
+              borderDash: [6, 4],
+              tension: 0.2,
+              pointRadius: 3,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          animation: false,
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: "#0C1B30" } } },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: "#5C6B80" }, grid: { color: "rgba(12,27,48,0.08)" } },
+            x: { ticks: { color: "#0C1B30" }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    const charts = { identities: initFunnelChart, applications: initAppChart, risks: initBurnChart };
+    const TAB_ORDER = ["overview", "waves", "identities", "applications", "risks"];
+    let popoverReturnFocus = null;
+
+    function showTab(name) {
+      TAB_ORDER.forEach((t) => {
+        const panel = document.getElementById("panel-" + t);
+        const tab = document.getElementById("tab-" + t);
+        const on = t === name;
+        panel.classList.toggle("active", on);
+        panel.hidden = !on;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        tab.tabIndex = on ? 0 : -1;
+      });
+      if (charts[name]) {
+        requestAnimationFrame(() => charts[name]());
+      }
+    }
+
+    function onTabKeydown(e) {
+      const i = TAB_ORDER.indexOf(e.currentTarget.id.replace("tab-", ""));
+      if (i < 0) return;
+      let next = i;
+      if (e.key === "ArrowRight") next = (i + 1) % TAB_ORDER.length;
+      else if (e.key === "ArrowLeft") next = (i - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+      else return;
+      e.preventDefault();
+      showTab(TAB_ORDER[next]);
+      document.getElementById("tab-" + TAB_ORDER[next]).focus();
+    }
+
+    function openPopover(html) {
+      popoverReturnFocus = document.activeElement;
+      document.getElementById("popover-body").innerHTML = html;
+      const root = document.getElementById("popover");
+      root.classList.add("open");
+      document.getElementById("popover-close").focus();
+    }
+    function closePopover() {
+      document.getElementById("popover").classList.remove("open");
+      if (popoverReturnFocus && typeof popoverReturnFocus.focus === "function") {
+        popoverReturnFocus.focus();
+      }
+      popoverReturnFocus = null;
+    }
+    function trapPopoverFocus(e) {
+      if (e.key !== "Tab") return;
+      const root = document.getElementById("popover");
+      if (!root.classList.contains("open")) return;
+      const focusable = document.getElementById("popover-card").querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    function boot() {
+      assertData();
+      document.getElementById("header-sub").textContent =
+        `${DATA.meta.company} · ${DATA.meta.sourcePlatform} → ${DATA.meta.targetPlatform}`;
+      document.getElementById("header-asof").textContent =
+        `${formatDate(DATA.meta.windowStart)} – ${formatDate(DATA.meta.windowEnd)} · As of ${formatDate(DATA.meta.today)} · ${DATA.meta.owner}`;
+      document.getElementById("disclaimer").textContent = DATA.meta.disclaimer;
+
+      renderOverview();
+      renderWaves();
+      renderIdentities();
+      renderApplications();
+      renderRisks();
+
+      document.querySelectorAll(".tablist [role=tab]").forEach((btn) => {
+        btn.addEventListener("click", () => showTab(btn.id.replace("tab-", "")));
+        btn.addEventListener("keydown", onTabKeydown);
+      });
+      document.getElementById("popover-close").addEventListener("click", closePopover);
+      document.getElementById("popover").addEventListener("click", (e) => {
+        if (e.target.id === "popover") closePopover();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closePopover();
+        trapPopoverFocus(e);
+      });
+      showTab("overview");
+    }
+
+    boot();
+  </script>
+</body>
+</html>
